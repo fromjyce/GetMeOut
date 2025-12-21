@@ -4,8 +4,8 @@ from typing import Optional
 
 class TwilioCallManager:
     def __init__(self, account_sid: Optional [str] = None, auth_token: Optional [str] = None): 
-        self.account_sid = account_sid or os.getenv('TWILIO_ACCOUNT_SID', "ACe7873bdd729ec7850fedf67b074af71f") 
-        self.auth_token = auth_token or os.getenv('TWILIO_AUTH_TOKEN', "caa1ca923f6fcc8daf3447d695fcb800")
+        self.account_sid = account_sid or os.getenv('TWILIO_ACCOUNT_SID', "_") 
+        self.auth_token = auth_token or os.getenv('TWILIO_AUTH_TOKEN', "_")
         self.client = Client(self.account_sid, self.auth_token)
 
     def create_twiml_message(self, message: str, voice: str = "alice") -> str:
@@ -21,7 +21,7 @@ class TwilioCallManager:
             return None
 
 def main():
-        twilio_number = "+13853343642"
+        twilio_number = "_"
         my_phone_number = "+919025520072"
         message =  "Pankaj, This is your official escape call. Time to get out of that awkward situation. Act natural."
         call_manager = TwilioCallManager()
