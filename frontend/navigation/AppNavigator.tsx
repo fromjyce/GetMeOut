@@ -1,14 +1,15 @@
+// navigation/AppNavigator.tsx
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { HomeScreen } from '../screens/HomeScreen';
 import { CustomCallScreen } from '../screens/CustomCallScreen';
+import RoutinesScreen from '../screens/RoutinesScreen';
+import { AddEditRoutineScreen } from '../screens/AddEditRoutineScreen';
 import { RootStackParamList } from '../types/navigation';
 
-// Create the stack navigator
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-// Main App Navigator component
 export const AppNavigator = () => {
   return (
     <NavigationContainer>
@@ -41,6 +42,23 @@ export const AppNavigator = () => {
             headerBackTitle: 'Back',
           }}
         />
+        <Stack.Screen
+          name="Routines"
+          component={RoutinesScreen}
+          options={{
+            title: 'Routines',
+            headerBackTitle: 'Back',
+          }}
+        />
+          <Stack.Screen
+            name="AddEditRoutine"
+            component={AddEditRoutineScreen}
+            options={({ route }) => ({
+              title: route.params?.routineId ? 'Edit Routine' : 'Add Routine',
+              headerBackTitle: 'Cancel',
+            })}
+          />
+        {/* Add more screens here as needed */}
       </Stack.Navigator>
     </NavigationContainer>
   );
