@@ -60,11 +60,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     setShakeEnabled(enabled);
   };
 
- // screens/HomeScreen.tsx
-// Add this to the handleEscapePress function
 const handleEscapePress = async () => {
-  if (!settings) {
-    Alert.alert('Settings Required', 'Please configure your phone number and default caller in Settings.');
+  if (!settings?.userPhoneNumber || !settings.defaultCallerNumber) {
+    Alert.alert('Error', 'Please configure your phone numbers in Settings first');
+    navigation.navigate('Settings');
     return;
   }
 
@@ -76,24 +75,14 @@ const handleEscapePress = async () => {
       settings.defaultMessage
     );
 
-    // Save to history
-    await storageService.saveCallHistory({
-      type: 'escape',
-      toNumber: settings.userPhoneNumber,
-      fromNumber: settings.defaultCallerNumber,
-      message: settings.defaultMessage,
-      status: result.success ? 'success' : 'failed',
-      error: result.error,
-    });
-
     if (result.success) {
-      Alert.alert('Success', 'Escape call has been triggered!');
+      Alert.alert('Success', 'Escape call initiated!');
     } else {
-      Alert.alert('Error', result.error || 'Failed to trigger call');
+      Alert.alert('Error', result.error || 'Failed to initiate call');
     }
   } catch (error) {
-    console.error('Error triggering call:', error);
-    Alert.alert('Error', 'An unexpected error occurred');
+    console.error('Error:', error);
+    Alert.alert('Error', 'Failed to initiate call. Please try again.');
   } finally {
     setLoading(false);
   }

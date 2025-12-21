@@ -24,6 +24,7 @@ export const CustomCallScreen: React.FC = () => {
     toNumber: '',
     fromNumber: '',
     message: 'I need to leave soon. Can we talk later?',
+    contactName: '',
   });
   const [settings, setSettings] = useState<any>(null);
 
@@ -53,8 +54,7 @@ export const CustomCallScreen: React.FC = () => {
     }));
   };
 
-  // screens/CustomCallScreen.tsx
-// Add this to the handleSubmit function
+
 const handleSubmit = async () => {
   if (!formData.toNumber || !formData.fromNumber) {
     Alert.alert('Error', 'Please fill in all required fields');
@@ -63,31 +63,22 @@ const handleSubmit = async () => {
 
   setLoading(true);
   try {
-    const result = await apiService.triggerEscapeCall(
-      formData.toNumber,
-      formData.fromNumber,
-      formData.message
-    );
-
-    // Save to history
-    await storageService.saveCallHistory({
-      type: 'custom',
-      toNumber: formData.toNumber,
-      fromNumber: formData.fromNumber,
+    const result = await apiService.triggerCustomCall({
+      to_number: formData.toNumber,
+      from_number: formData.fromNumber,
       message: formData.message,
-      status: result.success ? 'success' : 'failed',
-      error: result.error,
+      contact_name: formData.contactName || '',
     });
 
     if (result.success) {
-      Alert.alert('Success', 'Custom call has been triggered!');
+      Alert.alert('Success', 'Custom call initiated!');
       navigation.goBack();
     } else {
-      Alert.alert('Error', result.error || 'Failed to trigger call');
+      Alert.alert('Error', result.error || 'Failed to initiate call');
     }
   } catch (error) {
-    console.error('Error triggering call:', error);
-    Alert.alert('Error', 'An unexpected error occurred');
+    console.error('Error:', error);
+    Alert.alert('Error', 'Failed to initiate call. Please try again.');
   } finally {
     setLoading(false);
   }

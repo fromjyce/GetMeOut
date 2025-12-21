@@ -39,9 +39,9 @@ client = Client(account_sid, auth_token)
 
 # Models
 class EscapeCallRequest(BaseModel):
-    to_number: str
-    from_number: str
-    message: str
+    to_number: str = "+916382230940"  # Default to user's number
+    from_number: str = twilio_number  # Use Twilio number from environment
+    message: str = "This is your escape call. You can leave now."
 
 class CustomCallRequest(EscapeCallRequest):
     contact_name: Optional[str] = None
@@ -62,17 +62,32 @@ async def trigger_escape_call(request: EscapeCallRequest):
     Trigger an escape call to the specified number
     """
     try:
+        print(f"Incoming request: {request}")  # Debug log
+        
         # Create TwiML for the call
         response = VoiceResponse()
         response.say(request.message)
         
+        # Ensure we have valid numbers
+        to_number = request.to_number or "+916382230940"  # Default to user's number
+        from_number = twilio_number  # Always use the Twilio number from environment
+        
+        # Ensure proper formatting
+        to_number = to_number.strip()
+        if not to_number.startswith('+'):
+            to_number = f"+{to_number}"
+            
+        print(f"Making call - To: {to_number}, From: {from_number}")  # Debug log
+        
         # Make the call using Twilio
         call = client.calls.create(
-            to=request.to_number,
-            from_=request.from_number,
+            to=to_number,
+            from_=from_number,
             twiml=str(response),
             record=True
         )
+        
+        print(f"Call initiated successfully. SID: {call.sid}")  # Debug log
         
         return {
             "success": True,
