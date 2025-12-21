@@ -18,7 +18,7 @@ export const ShakeTriggerStatus: React.FC<ShakeTriggerStatusProps> = ({
           {enabled ? 'ON' : 'OFF'}
         </Text>
         <Switch
-          value={enabled}
+          value={!!enabled}  // Ensure boolean value
           onValueChange={onToggle}
           trackColor={{ false: '#767577', true: '#34C759' }}
           thumbColor={enabled ? '#fff' : '#f4f3f4'}

@@ -15,8 +15,13 @@ import { apiService } from '../services/api';
 import { storageService } from '../services/storage';
 import { AppSettings } from '../types';
 
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../types/navigation';
+
+type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
+
 interface HomeScreenProps {
-  navigation?: any; // Will be properly typed when navigation is set up
+  navigation: HomeScreenNavigationProp;
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
@@ -87,12 +92,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     await updateShakeEnabled(enabled);
   };
 
-  const navigateToScreen = (screenName: string) => {
-    if (navigation) {
-      navigation.navigate(screenName);
-    } else {
-      Alert.alert('Navigation', `Would navigate to ${screenName}`);
-    }
+  const navigateToScreen = (
+    screenName: keyof RootStackParamList,
+    params?: any
+  ) => {
+    navigation.navigate(screenName as any, params);
   };
 
   return (
