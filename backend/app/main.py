@@ -1,8 +1,9 @@
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Optional, List
-from datetime import datetime
+from typing import Dict, List, Optional
+from datetime import datetime, time
+from uuid import uuid4
 import os
 from dotenv import load_dotenv
 from twilio.rest import Client
@@ -50,6 +51,24 @@ class CallResponse(BaseModel):
     success: bool
     call_sid: Optional[str] = None
     error: Optional[str] = None
+
+# Routine Models
+class RoutineBase(BaseModel):
+    name: str
+    time: str
+    days: List[str]
+    enabled: bool = True
+    to_number: str
+    message: str = "This is your scheduled escape call."
+
+class RoutineCreate(RoutineBase):
+    pass
+
+class Routine(RoutineBase):
+    id: str
+
+# In-memory storage for routines (in production, use a database)
+routines_db: Dict[str, Routine] = {}
 
 # API Routes
 @app.get("/")
@@ -134,6 +153,82 @@ async def trigger_custom_call(request: CustomCallRequest):
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "timestamp": datetime.utcnow()}
+
+# Routine Endpoints
+@app.get("/api/routines", response_model=List[Routine])
+async def get_routines():
+    """Get all routines"""
+    return list(routines_db.values())
+
+@app.post("/api/routines", response_model=Routine)
+async def create_routine(routine: RoutineCreate):
+    """Create a new routine"""
+    routine_id = str(uuid4())
+    routine_dict = routine.dict()
+    routine_dict["id"] = routine_id
+    routines_db[routine_id] = Routine(**routine_dict)
+    return routines_db[routine_id]
+
+@app.get("/api/routines/{routine_id}", response_model=Routine)
+async def get_routine(routine_id: str):
+    """Get a specific routine by ID"""
+    if routine_id not in routines_db:
+        raise HTTPException(status_code=404, detail="Routine not found")
+    return routines_db[routine_id]
+
+@app.put("/api/routines/{routine_id}", response_model=Routine)
+async def update_routine(routine_id: str, routine: RoutineCreate):
+    """Update a routine"""
+    if routine_id not in routines_db:
+        raise HTTPException(status_code=404, detail="Routine not found")
+    routine_dict = routine.dict()
+    routine_dict["id"] = routine_id
+    routines_db[routine_id] = Routine(**routine_dict)
+    return routines_db[routine_id]
+
+@app.delete("/api/routines/{routine_id}")
+async def delete_routine(routine_id: str):
+    """Delete a routine"""
+    if routine_id not in routines_db:
+        raise HTTPException(status_code=404, detail="Routine not found")
+    del routines_db[routine_id]
+    return {"message": "Routine deleted successfully"}
+
+@app.post("/api/routines/{routine_id}/trigger", response_model=CallResponse)
+async def trigger_routine(routine_id: str):
+    """Trigger a routine call immediately"""
+    if routine_id not in routines_db:
+        raise HTTPException(status_code=404, detail="Routine not found")
+    
+    routine = routines_db[routine_id]
+    
+    try:
+        # Ensure proper phone number formatting
+        to_number = routine.to_number.strip()
+        if not to_number.startswith('+'):
+            to_number = f"+{to_number}"
+            
+        # Create TwiML for the call
+        response = VoiceResponse()
+        response.say(routine.message)
+        
+        # Make the call using Twilio
+        call = client.calls.create(
+            to=to_number,
+            from_=twilio_number,
+            twiml=str(response),
+            record=True
+        )
+        
+        return {
+            "success": True,
+            "call_sid": call.sid
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to trigger routine call: {str(e)}"
+        )
 
 if __name__ == "__main__":
     import uvicorn

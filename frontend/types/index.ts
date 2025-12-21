@@ -19,3 +19,13 @@ export interface EscapeCallRequest {
     backendUrl: string;
     apiToken?: string;
   }
+
+  export interface Routine {
+    id: string;
+    name: string;
+    time: string;
+    days: string[];
+    enabled: boolean;
+    to_number: string;
+    message: string;
+  }
