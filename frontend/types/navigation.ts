@@ -11,9 +11,14 @@ export type RootStackParamList = {
   Home: undefined;
   CustomCall: undefined;
   Routines: { newRoutine?: Omit<Routine, 'id'> };
-  AddEditRoutine: { routineId?: string };
+  AddEditRoutine: AddEditRoutineScreenParams;
   History: undefined;
   Settings: undefined;
+};
+
+export type AddEditRoutineScreenParams = {
+  routineId?: string;
+  onSave?: (routine: Omit<Routine, 'id'>) => void;
 };
 
 export type { Routine };

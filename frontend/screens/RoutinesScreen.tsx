@@ -64,8 +64,18 @@ const RoutinesScreen: React.FC<RoutinesScreenProps> = ({ navigation, route }) =>
   }, [routines]);
 
   const handleAddRoutine = () => {
-    navigation.navigate('AddEditRoutine', {});
-  };
+  navigation.navigate('AddEditRoutine', {
+    onSave: (newRoutine: Omit<Routine, 'id'>) => {
+      const newRoutineWithId = {
+        ...newRoutine,
+        id: Date.now().toString(),
+      };
+      setRoutines(prev => [...prev, newRoutineWithId]);
+      navigation.goBack();
+    }
+  });
+};
+
 
   // Handle new routine when returning from AddEditRoutine screen
   useFocusEffect(

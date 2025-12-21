@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { RootStackParamList } from '../types/navigation';
+import { RootStackParamList, AddEditRoutineScreenParams } from '../types/navigation';
 
 type Routine = {
   id?: string;
@@ -13,7 +13,7 @@ type Routine = {
 };
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-type AddEditRoutineScreenRouteProp = RouteProp<RootStackParamList, 'AddEditRoutine'>;
+type AddEditRoutineScreenRouteProp = RouteProp<{ AddEditRoutine: AddEditRoutineScreenParams }, 'AddEditRoutine'>;
 
 export const AddEditRoutineScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -44,15 +44,7 @@ const handleSave = () => {
     enabled: true
   };
   
-  // Navigate back to Routines screen with the new routine
-  navigation.navigate('Routines', { 
-    newRoutine: {
-      name: newRoutine.name,
-      time: newRoutine.time,
-      days: newRoutine.days,
-      enabled: newRoutine.enabled
-    }
-  });
+  navigation.navigate('Routines', { newRoutine });
 };
 
   return (
