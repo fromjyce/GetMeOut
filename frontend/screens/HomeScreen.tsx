@@ -14,9 +14,9 @@ import { useShakeDetection } from '../hooks/useShakeDetection';
 import { apiService } from '../services/api';
 import { storageService } from '../services/storage';
 import { AppSettings } from '../types';
-
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
+import { Ionicons } from '@expo/vector-icons';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -38,7 +38,17 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   useEffect(() => {
     loadSettings();
     loadShakeStatus();
-  }, []);
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity 
+          onPress={() => navigation.navigate('Settings')}
+          style={{ marginRight: 15 }}
+        >
+          <Ionicons name="settings-outline" size={24} color="#FF3B30" />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
 
   const loadSettings = async () => {
     const loadedSettings = await storageService.getSettings();
@@ -50,42 +60,44 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     setShakeEnabled(enabled);
   };
 
-  const handleEscapePress = async () => {
-    if (!settings) {
-      Alert.alert('Settings Required', 'Please configure your phone number and default caller in Settings.');
-      return;
-    }
+ // screens/HomeScreen.tsx
+// Add this to the handleEscapePress function
+const handleEscapePress = async () => {
+  if (!settings) {
+    Alert.alert('Settings Required', 'Please configure your phone number and default caller in Settings.');
+    return;
+  }
 
-    if (!settings.userPhoneNumber || !settings.defaultCallerNumber) {
-      Alert.alert(
-        'Configuration Required',
-        'Please set your phone number and default caller number in Settings first.'
-      );
-      return;
-    }
-
-    setLoading(true);
-    setStatusMessage('');
-
+  setLoading(true);
+  try {
     const result = await apiService.triggerEscapeCall(
       settings.userPhoneNumber,
       settings.defaultCallerNumber,
       settings.defaultMessage
     );
 
-    setLoading(false);
+    // Save to history
+    await storageService.saveCallHistory({
+      type: 'escape',
+      toNumber: settings.userPhoneNumber,
+      fromNumber: settings.defaultCallerNumber,
+      message: settings.defaultMessage,
+      status: result.success ? 'success' : 'failed',
+      error: result.error,
+    });
 
     if (result.success) {
-      setStatusMessage(`Call initiated! SID: ${result.callSid}`);
       Alert.alert('Success', 'Escape call has been triggered!');
     } else {
-      setStatusMessage(`Error: ${result.error}`);
       Alert.alert('Error', result.error || 'Failed to trigger call');
     }
-
-    // Clear status message after 5 seconds
-    setTimeout(() => setStatusMessage(''), 5000);
-  };
+  } catch (error) {
+    console.error('Error triggering call:', error);
+    Alert.alert('Error', 'An unexpected error occurred');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleShakeToggle = async (enabled: boolean) => {
     setShakeEnabled(enabled);

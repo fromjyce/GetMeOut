@@ -1,4 +1,8 @@
 // types/navigation.ts
+
+import { CallHistoryItem } from './history';
+
+
 type Routine = {
   id: string;  // Remove the ? to make it required
   name: string;
@@ -15,6 +19,7 @@ export type RootStackParamList = {
   History: undefined;
   Settings: undefined;
 };
+
 
 export type AddEditRoutineScreenParams = {
   routineId?: string;

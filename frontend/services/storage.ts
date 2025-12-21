@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppSettings } from '../types';
+import { CallHistoryItem } from '../types/history';
 
 const STORAGE_KEYS = {
   SETTINGS: '@GetMeOut:settings',
@@ -39,21 +40,24 @@ export const storageService = {
     return data ? JSON.parse(data) : false;
   },
 
-  // Call History
-  async saveCallHistory(historyItem: any): Promise<void> {
+  async saveCallHistory(historyItem: Omit<CallHistoryItem, 'id' | 'timestamp'>): Promise<void> {
     const history = await this.getCallHistory();
-    history.unshift({
+    const newItem: CallHistoryItem = {
       ...historyItem,
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       timestamp: new Date().toISOString(),
-    });
+    };
+    history.unshift(newItem);
     // Keep only last 100 entries
     const limited = history.slice(0, 100);
     await AsyncStorage.setItem(STORAGE_KEYS.CALL_HISTORY, JSON.stringify(limited));
   },
-
-  async getCallHistory(): Promise<any[]> {
+  async getCallHistory(): Promise<CallHistoryItem[]> {
     const data = await AsyncStorage.getItem(STORAGE_KEYS.CALL_HISTORY);
     return data ? JSON.parse(data) : [];
+  },
+  async clearCallHistory(): Promise<void> {
+    await AsyncStorage.removeItem(STORAGE_KEYS.CALL_HISTORY);
   },
 };
 

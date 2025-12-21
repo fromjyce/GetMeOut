@@ -7,6 +7,8 @@ import { CustomCallScreen } from '../screens/CustomCallScreen';
 import RoutinesScreen from '../screens/RoutinesScreen';
 import { AddEditRoutineScreen } from '../screens/AddEditRoutineScreen';
 import { RootStackParamList } from '../types/navigation';
+import HistoryScreen from '../screens/HistoryScreen';
+import SettingsScreen from '../screens/SettingsScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -58,8 +60,23 @@ export const AppNavigator = () => {
               headerBackTitle: 'Cancel',
             })}
           />
-        {/* Add more screens here as needed */}
-      </Stack.Navigator>
+          <Stack.Screen
+            name="History"
+            component={HistoryScreen}
+            options={{
+              title: 'Call History',
+              headerBackTitle: 'Back',
+            }}
+          />
+          <Stack.Screen
+            name="Settings"
+            component={SettingsScreen}
+            options={{
+              title: 'Settings',
+              headerBackTitle: 'Back',
+            }}
+          />
+        </Stack.Navigator>
     </NavigationContainer>
   );
 };

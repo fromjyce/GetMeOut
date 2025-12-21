@@ -53,34 +53,45 @@ export const CustomCallScreen: React.FC = () => {
     }));
   };
 
-  const handleSubmit = async () => {
-    if (!formData.toNumber || !formData.fromNumber) {
-      Alert.alert('Error', 'Please fill in all required fields');
-      return;
+  // screens/CustomCallScreen.tsx
+// Add this to the handleSubmit function
+const handleSubmit = async () => {
+  if (!formData.toNumber || !formData.fromNumber) {
+    Alert.alert('Error', 'Please fill in all required fields');
+    return;
+  }
+
+  setLoading(true);
+  try {
+    const result = await apiService.triggerEscapeCall(
+      formData.toNumber,
+      formData.fromNumber,
+      formData.message
+    );
+
+    // Save to history
+    await storageService.saveCallHistory({
+      type: 'custom',
+      toNumber: formData.toNumber,
+      fromNumber: formData.fromNumber,
+      message: formData.message,
+      status: result.success ? 'success' : 'failed',
+      error: result.error,
+    });
+
+    if (result.success) {
+      Alert.alert('Success', 'Custom call has been triggered!');
+      navigation.goBack();
+    } else {
+      Alert.alert('Error', result.error || 'Failed to trigger call');
     }
-
-    setLoading(true);
-
-    try {
-      const result = await apiService.triggerEscapeCall(
-        formData.toNumber,
-        formData.fromNumber,
-        formData.message
-      );
-
-      if (result.success) {
-        Alert.alert('Success', 'Your custom call has been triggered!');
-        navigation.goBack();
-      } else {
-        Alert.alert('Error', result.error || 'Failed to trigger call');
-      }
-    } catch (error) {
-      console.error('Error triggering call:', error);
-      Alert.alert('Error', 'An unexpected error occurred');
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (error) {
+    console.error('Error triggering call:', error);
+    Alert.alert('Error', 'An unexpected error occurred');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <KeyboardAvoidingView 
