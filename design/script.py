@@ -22,7 +22,7 @@ class TwilioCallManager:
 
 def main():
         twilio_number = "_"
-        my_phone_number = "+919025520072"
+        my_phone_number = "+91XXXXXXXXXX"
         message =  "Pankaj, This is your official escape call. Time to get out of that awkward situation. Act natural."
         call_manager = TwilioCallManager()
         call_sid  = call_manager.make_call(
