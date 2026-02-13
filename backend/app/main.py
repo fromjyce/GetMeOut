@@ -88,7 +88,7 @@ async def trigger_escape_call(request: EscapeCallRequest):
         response.say(request.message)
         
         # Ensure we have valid numbers
-        to_number = request.to_number or "+916382230940"  # Default to user's number
+        to_number = request.to_number or "+91XXXXXXXX"  # Default to user's number
         from_number = twilio_number  # Always use the Twilio number from environment
         
         # Ensure proper formatting
